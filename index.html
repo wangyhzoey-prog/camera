@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>银盐的感光性</title>
+    <style>
+        :root { --bg: #FAF9F6; --main: #1C1C1C; --accent: #A67C52; --grey: #757575; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: var(--bg); font-family: -apple-system, "PingFang SC", serif; color: var(--main); }
+        
+        .scene { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; padding: 40px 20px; box-sizing: border-box; text-align: center; }
+        .active { display: flex; animation: fadeIn 0.8s ease forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .header { margin-bottom: 20px; flex-shrink: 0; }
+        .index { font-size: 0.7em; letter-spacing: 4px; color: var(--accent); font-weight: bold; margin-bottom: 5px; }
+        .title { font-size: 1.3em; font-family: "Georgia", serif; font-weight: normal; }
+
+        .stage { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; overflow: hidden; }
+        .artifact { max-width: 80%; max-height: 80%; object-fit: contain; transition: 1.5s ease; }
+
+        /* 金色棕色引用样式 */
+        .quote-accent { color: var(--accent); font-weight: 500; }
+
+        .tap-hint { font-size: 0.8em; color: var(--accent); margin-bottom: 15px; letter-spacing: 1px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+
+        .hist-tag { position: absolute; top: 10px; right: 10px; font-size: 0.6em; background: var(--accent); color: #fff; padding: 3px 8px; opacity: 0; transition: 1s; }
+
+        .curator-note { background: #FFF; border-top: 1px solid #EEE; padding: 20px; width: 100%; max-width: 400px; text-align: left; box-shadow: 0 -5px 20px rgba(0,0,0,0.02); min-height: 150px; display: flex; align-items: center; z-index: 10; }
+        .note-text { font-size: 0.9em; line-height: 1.7; color: var(--grey); }
+        .note-text b { color: var(--main); }
+
+        .btn-wrap { padding: 20px 0; z-index: 999; width: 100%; display: flex; justify-content: center; background: var(--bg); }
+        .btn { background: none; border: 1px solid var(--main); padding: 12px 30px; letter-spacing: 2px; font-size: 0.85em; text-transform: uppercase; cursor: pointer; }
+        .btn:active { background: var(--main); color: var(--bg); }
+
+        .dot-group { display: flex; gap: 20px; }
+        .dot { width: 45px; height: 45px; border-radius: 50%; border: 1px solid #EEE; }
+        .dot.active { border: 2px solid var(--accent); transform: scale(1.1); }
+
+        #final-overlay { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 4s ease; z-index: 500; }
+    </style>
+</head>
+<body>
+
+    <div id="final-overlay"></div>
+
+    <div id="step0" class="scene active">
+        <div class="header"><div class="index">PROLOGUE</div><div class="title">现象的初见</div></div>
+        <div class="stage"><img src="item_sala_discovery.png" class="artifact"></div>
+        <div class="curator-note">
+            <div class="note-text">
+                1614年，意大利医生安杰洛·萨拉（Angelo Sala, 1576–1637）发现，“<span class="quote-accent">当硝酸银粉末暴露在阳光下时，它会变得像墨水一样变黑</span>”，首次记录了光对银化合物的化学作用。
+            </div>
+        </div>
+        <div class="btn-wrap"><button class="btn" onclick="goStep(1)">步入实验室</button></div>
+    </div>
+
+    <div id="step1" class="scene">
+        <div class="header"><div class="index">STEP 01</div><div class="title">感光性的物理实证</div></div>
+        <div class="stage"><img src="item_silver_jar.png" class="artifact" id="silver-jar"></div>
+        <div class="curator-note">
+            <div class="note-text" id="step1-info">
+                <b>1727年前后，德国化学家约翰·舒尔茨（Johann Heinrich Schulze, 1687–1744)证明了：</b><br>
+                并非太阳的热，亦非空气本身，而是太阳光线使硝酸银粉末变黑。
+            </div>
+        </div>
+        <div class="btn-wrap">
+            <button class="btn" id="btn-schulze" onclick="runSchulze()">开始科学实证</button>
+            <button class="btn" id="btn-next1" style="display:none;" onclick="goStep(2)">进入光谱探索</button>
+        </div>
+    </div>
+
+    <div id="step2" class="scene">
+        <div class="header"><div class="index">STEP 02</div><div class="title">光谱选择性与定影雏形</div></div>
+        <div class="stage" style="flex-direction: column;">
+            <p class="tap-hint">—— 请点击颜色 ——</p>
+            <div class="dot-group">
+                <div class="dot" style="background: #4B0082;" onclick="testColor(this, 'violet')"></div>
+                <div class="dot" style="background: #FF0000;" onclick="testColor(this, 'red')"></div>
+            </div>
+        </div>
+        <div class="curator-note">
+            <div class="note-text" id="step2-info">
+                <b>1777年，瑞典化学家卡尔·舍勒（Carl Wilhelm Scheele, 1742–1786）发现：</b><br>
+                银盐变黑在紫光下最快，并观察到氨水可以溶解未曝光的银盐，这实际上是摄影"定影"技术的最早雏形。
+                <br><br>
+                <b>1782年，让·塞内比埃（Jean Senebier, 1742–1809）重复舍勒实验，发现：</b><br>
+                氯化银在紫光下15秒即可变黑，而红光则需20分钟，揭示了光谱对感光度的影响。
+            </div>
+        </div>
+        <div class="btn-wrap"><button class="btn" id="btn-next2" style="display:none;" onclick="goStep(3)">应用舍勒发现</button></div>
+    </div>
+
+    <div id="step3" class="scene">
+        <div class="header"><div class="index">STEP 03</div><div class="title">卤族元素的进化</div></div>
+        <div class="stage"><p style="font-family:serif; letter-spacing:5px; font-size:1.6em; color:var(--accent);">Iodine & Bromine</p></div>
+        <div class="curator-note"><div class="note-text"><b>1811-1826年：</b><br>库尔图瓦与巴拉尔相继发现<b>碘与溴</b>。这些元素将为摄影术提供高感光度。</div></div>
+        <div class="btn-wrap"><button class="btn" onclick="goStep(4)">了解系统探索</button></div>
+    </div>
+
+    <div id="step4" class="scene">
+        <div class="header"><div class="index">STEP 04</div><div class="title">光化学成像的系统探索</div></div>
+        <div class="stage"><img src="item_fulhame.png" class="artifact"></div>
+        <div class="curator-note">
+            <div class="note-text">
+                <b>1780–1794年间，英国化学家伊丽莎白·富尔哈默（Elizabeth Fulhame）：</b><br>
+                她开展了光化学成像的最早系统探索，尝试用光在布料上<span class="quote-accent">“绘制”</span>地图。这一研究为感光媒介在织物等多元受体上的应用提供了先导。
+            </div>
+        </div>
+        <div class="btn-wrap"><button class="btn" onclick="goStep(5)">进入韦奇伍德实验</button></div>
+    </div>
+
+    <div id="step5" class="scene">
+        <div class="header"><div class="index">STEP 05</div><div class="title">物影之殇：视觉暂存的瓶颈</div></div>
+        <div class="stage">
+            <div id="tag-hist" class="hist-tag">HISTORICAL ARCHIVE</div>
+            <img src="item_leather_empty.png" class="artifact" id="leather-img">
+        </div>
+        <div class="curator-note">
+            <div class="note-text" id="step5-info">
+                <b>1802年，汤姆斯·韦奇伍德（Thomas Wedgwood, 1771–1805）：</b><br>他尝试将植物等物体置于涂有硝酸银的皮革上进行感光实验。
+            </div>
+        </div>
+        <div class="btn-wrap"><button class="btn" id="btn-expo" onclick="runExpo()">开始曝光</button></div>
+    </div>
+
+    <script>
+        function goStep(n) {
+            document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + n).classList.add('active');
+        }
+
+        function runSchulze() {
+            document.getElementById('silver-jar').style.filter = "brightness(0.12) sepia(0.2)";
+            const info = document.getElementById('step1-info');
+            info.style.opacity = 0;
+            setTimeout(() => {
+                info.innerHTML = "<b>1727年前后，约翰·舒尔茨（Johann Heinrich Schulze, 1687–1744)证明了：</b><br>使硝酸银粉末变黑的并非太阳的热量，也非空气本身，而是<b>太阳光线的作用</b>。";
+                info.style.opacity = 1;
+                document.getElementById('btn-schulze').style.display = "none";
+                document.getElementById('btn-next1').style.display = "block";
+            }, 500);
+        }
+
+        function testColor(el, color) {
+            document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
+            el.classList.add('active');
+            const info = document.getElementById('step2-info');
+            if(color === 'violet') {
+                info.innerHTML = "<b>紫光：</b>感光极速。同时舍勒观察到氨水可溶解未感光银盐，定影雏形初现。";
+                document.getElementById('btn-next2').style.display = "block";
+            } else { info.innerHTML = "<b>红光：</b>反应极慢，体现了光化学反应对频率的依赖。"; }
+        }
+
+        function runExpo() {
+            const img = document.getElementById('leather-img');
+            const tag = document.getElementById('tag-hist');
+            const info = document.getElementById('step5-info');
+            document.getElementById('btn-expo').style.display = 'none';
+
+            img.style.opacity = 0;
+            setTimeout(() => {
+                img.src = "item_leather_with_leaf.png"; 
+                img.style.opacity = 1;
+                tag.style.opacity = 1;
+                info.innerHTML = "<b>显影成功：</b>这是诞生于1802年的物影图像（Photograms），也是人类历史上的珍贵影像。";
+
+                setTimeout(() => {
+                    document.getElementById('final-overlay').style.opacity = "0.97";
+                    info.innerHTML = "<b>遗憾的结局：</b><br>由于缺乏永久定影手段，影像在光线下迅速变黑。人类仍在寻找捕捉永恒的方法。";
+                    setTimeout(() => { if(confirm("是否重启？")) location.reload(); }, 4000);
+                }, 5000);
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
