@@ -2,53 +2,57 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, minimum-scale=1.0">
     <title>银盐的感光性</title>
     <style>
-        /* 颜色定义更新：--btn-color 更新为更和谐高级的深棕色 #5D4037 */
-        :root { --bg: #FAF9F6; --main: #1C1C1C; --accent: #A67C52; --grey: #757575; --step-gold: #e0d4a8; --btn-color: #5D4037; }
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: var(--bg); font-family: -apple-system, "PingFang SC", serif; color: var(--main); }
+        :root { --bg: #FAF9F6; --main: #1C1C1C; --accent: #A67C52; --grey: #757575; }
         
-        /* 基础场景布局 */
-        .scene { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; padding: 40px 20px; box-sizing: border-box; text-align: center; }
-        .active { display: flex; animation: fadeIn 0.8s ease forwards; }
+        /* 👇 仅适配：强制不跟随系统字体 + 锁定基准，不影响任何内容 */
+        html {
+            -webkit-text-size-adjust: none !important;
+            text-size-adjust: none !important;
+            font-size: 16px !important;
+        }
+        
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background: var(--bg); font-family: -apple-system, "PingFang SC", "STHeiti", sans-serif; color: var(--main); }
+        
+        /* 场景布局 */
+        .scene { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; padding: 40px 20px; box-sizing: border-box; text-align: center; background: var(--bg); }
+        .active { display: flex; animation: fadeIn 0.4s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* 顶部标题：淡金色 #e0d4a8 */
+        /* 顶部 */
         .header { margin-bottom: 20px; flex-shrink: 0; }
-        .index { font-size: 0.7em; letter-spacing: 4px; color: var(--step-gold); font-weight: bold; margin-bottom: 5px; }
+        .index { font-size: 0.7em; letter-spacing: 4px; color: var(--accent); font-weight: bold; margin-bottom: 5px; }
         .title { font-size: 1.3em; font-family: "Georgia", serif; font-weight: normal; }
 
-        /* 物件展示区：92.6% 比例 */
-        .stage { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; overflow: hidden; }
-        .artifact { max-width: 92.6%; max-height: 92.6%; object-fit: contain; transition: 1.5s ease; }
-
-        /* 金色棕色结论样式 */
-        .quote-accent { color: var(--accent); font-weight: normal; }
-        /* 灰色正文样式 */
-        .desc-grey { color: var(--grey); font-weight: normal; }
-
-        /* 交互引导小字 */
-        .tap-hint { font-size: 0.8em; color: var(--accent); margin-bottom: 15px; letter-spacing: 1px; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        /* 物件区 - 兼容小屏flex，不改变视觉 */
+        .stage { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; position: relative; min-height:0; }
+        .artifact { max-width: 80%; max-height: 75%; object-fit: contain; transition: opacity 1s; }
+        
+        /* 瓶子黑化遮罩 */
+        .jar-overlay { position: absolute; width: 180px; height: 180px; background: #000; mix-blend-mode: multiply; opacity: 0; transition: 2s; pointer-events: none; border-radius: 50%; filter: blur(20px); }
 
         /* 文案区 */
-        .curator-note { background: #FFF; border-top: 1px solid #EEE; padding: 20px; width: 100%; max-width: 400px; text-align: left; box-shadow: 0 -5px 20px rgba(0,0,0,0.02); min-height: 150px; display: flex; align-items: center; z-index: 10; }
-        .note-text { font-size: 0.9em; line-height: 1.7; color: var(--grey); }
-        .note-text b { color: var(--main); font-weight: bold; }
+        .curator-note { background: #FFF; border-top: 1px solid #EEE; padding: 20px; width: 100%; max-width: 400px; text-align: left; box-shadow: 0 -5px 20px rgba(0,0,0,0.02); min-height: 160px; display: flex; align-items: center; }
+        .note-text { font-size: 0.9em; line-height: 1.8; color: var(--grey); width: 100%; }
+        .note-text b { color: var(--main); }
 
-        /* 按钮文字颜色更新：深棕色 #5D4037 */
-        .btn-wrap { padding: 20px 0; z-index: 999; width: 100%; display: flex; gap: 15px; justify-content: center; background: var(--bg); }
-        .btn { background: none; border: 1px solid var(--btn-color); color: var(--btn-color); padding: 12px 30px; letter-spacing: 2px; font-size: 0.85em; text-transform: uppercase; cursor: pointer; transition: 0.3s; }
-        .btn:active { background: var(--btn-color); color: var(--bg); }
-        .btn-sub { border-color: var(--btn-color); color: var(--btn-color); opacity: 0.7; }
+        /* 引用文字 */
+        .quote { color: var(--accent); font-style: normal; }
 
+        /* 按钮区 */
+        .btn-wrap { padding: 25px 0; z-index: 9999; width: 100%; display: flex; justify-content: center; background: var(--bg); position: relative; }
+        .btn { background: none; border: 1px solid var(--main); padding: 12px 30px; letter-spacing: 2px; font-size: 0.85em; text-transform: uppercase; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        .btn:active { background: var(--main); color: var(--bg); }
+
+        /* 👇 修复：补全圆点active样式 + 确保点击可触发（安卓/iPhone完全一致） */
         .dot-group { display: flex; gap: 20px; }
         .dot { width: 45px; height: 45px; border-radius: 50%; border: 1px solid #EEE; cursor: pointer; }
-        .dot.active { border: 2px solid var(--accent); transform: scale(1.1); }
-
-        .hist-tag { position: absolute; top: 10px; right: 10px; font-size: 0.6em; background: var(--accent); color: #fff; padding: 3px 8px; opacity: 0; transition: 1s; }
-        #final-overlay { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 4s ease; z-index: 500; }
+        .dot.active { border-color: var(--accent); transform: scale(1.1); } /* 保留点击反馈，和iPhone原始效果一致 */
+        
+        /* 终极黑场 */
+        #final-overlay { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 4s ease; z-index: 9000; }
     </style>
 </head>
 <body>
@@ -60,8 +64,7 @@
         <div class="stage"><img src="item_sala_discovery.png" class="artifact"></div>
         <div class="curator-note">
             <div class="note-text">
-                <span class="desc-grey">安杰洛·萨拉（Angelo Sala）是个自学成才的意大利医生。1614年，他随手记录了一个偶然发现：当硝酸银粉末暴露在阳光下时，它会像墨水一样变黑。</span><br><br>
-                <span class="quote-accent">这是人类第一次记录光对银化合物的化学作用。</span>
+                1614年，意大利医生安杰洛·萨拉（Angelo Sala, 1576–1637）发现，“<span class="quote">当硝酸银粉末暴露在阳光下时，它会像墨水一样变黑</span>”，首次记录了光对银化合物的化学作用。
             </div>
         </div>
         <div class="btn-wrap"><button class="btn" onclick="goStep(1)">步入实验室</button></div>
@@ -69,10 +72,14 @@
 
     <div id="step1" class="scene">
         <div class="header"><div class="index">STEP 01</div><div class="title">感光性的物理实证</div></div>
-        <div class="stage"><img src="item_silver_jar.png" class="artifact" id="silver-jar"></div>
+        <div class="stage">
+            <img src="item_silver_jar.png" class="artifact" id="silver-jar">
+            <div id="jar-mask" class="jar-overlay"></div>
+        </div>
         <div class="curator-note">
             <div class="note-text" id="step1-info">
-                <b>1727年，德国阿尔特多夫大学的约翰·舒尔茨（Johann Heinrich Schulze）教授做了一个精巧的实验：</b><span class="desc-grey">把硝酸银装进瓶子，瓶包黑纸只留镂空字母。</span>
+                <b>1614年，安杰洛·萨拉（Angelo Sala）发现：</b><br>
+                “<span class="quote">当硝酸银粉末暴露在阳光下时，它会像墨水一样变黑</span>”，首次记录了光对银化合物的化学作用。
             </div>
         </div>
         <div class="btn-wrap">
@@ -83,124 +90,107 @@
 
     <div id="step2" class="scene">
         <div class="header"><div class="index">STEP 02</div><div class="title">光谱选择性与定影雏形</div></div>
-        <div class="stage" style="flex-direction: column;">
-            <p class="tap-hint">—— 请点击颜色 ——</p>
+        <div class="stage">
             <div class="dot-group">
-                <div id="dot-violet" class="dot" style="background: #4B0082;" onclick="testColor(this, 'violet')"></div>
-                <div id="dot-red" class="dot" style="background: #FF0000;" onclick="testColor(this, 'red')"></div>
+                <div class="dot" style="background: #4B0082;" onclick="testColor(this, 'violet')"></div>
+                <div class="dot" style="background: #FF0000;" onclick="testColor(this, 'red')"></div>
             </div>
         </div>
         <div class="curator-note">
             <div class="note-text" id="step2-info">
-                <b>1777年，瑞典药剂师卡尔·舍勒（Carl Wilhelm Scheele）发现，银盐对不同颜色的光反应截然不同：</b><br>
-                <span class="desc-grey">紫光能在极短时间内让氯化银变黑，而红光则需要漫长的时间。他还观察到氨水可以溶解未曝光的银盐，</span><span class="quote-accent">这实际上是摄影“定影”技术的最早雏形。</span>
+                <b>1777年，瑞典化学家卡尔·舍勒（Carl Wilhelm Scheele, 1742–1786）发现：</b><br>
+                银盐变黑在紫光下最快，并观察到氨水可以溶解未曝光的银盐，这实际上是摄影<span class="quote">“定影”</span>技术的最早雏形。
                 <br><br>
-                <b>1782年，瑞士博物学家让·塞内比埃（Jean Senebier）用棱镜将阳光分解成光谱，精确测量了不同颜色光线对氯化银的作用时间：</b><br>
-                <span class="quote-accent">这首次揭示了光谱对感光度的差异性影响。</span>
+                <b>1782年，让·塞内比埃（Jean Senebier, 1742–1809）重复舍勒实验，发现：</b><br>
+                氯化银在紫光下15秒即可变黑，而红光则需20分钟，揭示了光谱对感光度的影响。
             </div>
         </div>
-        <div class="btn-wrap">
-            <button class="btn btn-sub" id="btn-back-violet" style="display:none;" onclick="testColor(document.getElementById('dot-violet'), 'violet')">返回对比</button>
-            <button class="btn" id="btn-next2" style="display:none;" onclick="goStep(3)">应用舍勒发现</button>
-        </div>
+        <div class="btn-wrap"><button class="btn" id="btn-next2" style="display:none;" onclick="goStep(3)">应用舍勒发现</button></div>
     </div>
 
     <div id="step3" class="scene">
         <div class="header"><div class="index">STEP 03</div><div class="title">卤族元素的进化</div></div>
         <div class="stage"><p style="font-family:serif; letter-spacing:5px; font-size:1.6em; color:var(--accent);">Iodine & Bromine</p></div>
-        <div class="curator-note">
-            <div class="note-text">
-                <b>1811-1826年：</b><br>
-                <span class="desc-grey">法国化学家贝尔纳·库尔图瓦（Bernard Courtois）与安托万·巴拉尔（Antoine Jérôme Balard）相继发现碘与溴。</span><span class="quote-accent">这些元素将为摄影术提供高感光度。</span>
-            </div>
-        </div>
-        <div class="btn-wrap"><button class="btn" onclick="goStep(4)">继续探索</button></div>
+        <div class="curator-note"><div class="note-text"><b>1811-1826年：</b><br>库尔图瓦与巴拉尔相继发现<b>碘与溴</b>。这些元素将为摄影术提供高感光度。</div></div>
+        <div class="btn-wrap"><button class="btn" onclick="goStep(4)">进入韦奇伍德实验</button></div>
     </div>
 
     <div id="step4" class="scene">
-        <div class="header"><div class="index">STEP 04</div><div class="title">光化学成像的系统探索</div></div>
-        <div class="stage"><img src="item_fulhame.png" class="artifact"></div>
-        <div class="curator-note">
-            <div class="note-text">
-                <span class="desc-grey">在爱丁堡，一位摄影史中鲜被提及的化学家伊丽莎白·富尔哈默（Elizabeth Fulhame）尝试用光在布料上“绘制”地图。</span><br><br>
-                <span class="quote-accent">她在1794年出版的《论燃烧》一书中详细记录了这些实验，其中描述的“光还原”现象实际上是摄影化学的核心原理之一。</span>
-            </div>
-        </div>
-        <div class="btn-wrap"><button class="btn" onclick="goStep(5)">进入韦奇伍德实验</button></div>
-    </div>
-
-    <div id="step5" class="scene">
-        <div class="header"><div class="index">STEP 05</div><div class="title">物影暂存的瓶颈</div></div>
-        <div class="stage">
-            <div id="tag-hist" class="hist-tag">HISTORICAL ARCHIVE</div>
-            <img src="item_leather_empty.png" class="artifact" id="leather-img">
+        <div class="header"><div class="index">STEP 04</div><div class="title">物影之殇：视觉暂存的瓶颈</div></div>
+        <div class="stage" style="background: #fff;">
+            <div id="tag-hist" class="hist-tag" style="z-index: 10;">HISTORICAL ARCHIVE</div>
+            <img src="item_leather_empty.png" class="artifact" id="leather-img" style="opacity: 1;">
         </div>
         <div class="curator-note">
-            <div class="note-text" id="step5-info">
-                <b>1802年，托马斯·韦奇伍德（Thomas Wedgwood）开始系统实验：</b><span class="desc-grey">将树叶、昆虫翅膀、蕾丝等半透明物体放在涂有硝酸银的皮革或纸张上，然后暴露在阳光下。</span>
+            <div class="note-text" id="step4-info">
+                <b>1802年，汤姆斯·韦奇伍德：</b><br>尝试将植物等物体置于涂有硝酸银的皮革上进行感光实验。
             </div>
         </div>
         <div class="btn-wrap"><button class="btn" id="btn-expo" onclick="runExpo()">开始曝光</button></div>
     </div>
 
     <script>
+        // 预加载关键图片防止卡顿
+        const images = ["item_silver_jar.png", "item_leather_empty.png", "item_leather_with_leaf.png"];
+        images.forEach(src => { const img = new Image(); img.src = src; });
+
         function goStep(n) {
             document.querySelectorAll('.scene').forEach(s => s.classList.remove('active'));
-            document.getElementById('step' + n).classList.add('active');
+            const target = document.getElementById('step' + n);
+            if(target) target.classList.add('active');
         }
 
         function runSchulze() {
-            document.getElementById('silver-jar').style.filter = "brightness(0.12) sepia(0.2)";
+            document.getElementById('jar-mask').style.opacity = "0.8";
             const info = document.getElementById('step1-info');
             info.style.opacity = 0;
             setTimeout(() => {
-                info.innerHTML = "<b>阳光穿过字母，在粉末上“烧”出字迹——而被阳光加热的瓶身背面却毫无变化。舒尔茨证明：</b><span class='quote-accent'>让银盐变黑的是光，不是热。</span>";
+                info.innerHTML = "<b>1727年前后，约翰·舒尔茨（Johann Heinrich Schulze, 1687–1744)证明了：</b><br>使硝酸银粉末变黑的并非太阳的热量，也非空气本身，而是<b>太阳光线的作用</b>。";
                 info.style.opacity = 1;
                 document.getElementById('btn-schulze').style.display = "none";
                 document.getElementById('btn-next1').style.display = "block";
-            }, 500);
+            }, 600);
         }
 
         function testColor(el, color) {
             document.querySelectorAll('.dot').forEach(d => d.classList.remove('active'));
             el.classList.add('active');
             const info = document.getElementById('step2-info');
-            const btnNext = document.getElementById('btn-next2');
-            const btnBack = document.getElementById('btn-back-violet');
-
             if(color === 'violet') {
-                info.innerHTML = "<b>紫光：</b><span class='desc-grey'>氯化银在紫光下15秒即可变黑。</span>";
-                btnNext.style.display = "block";
-                btnBack.style.display = "none";
+                info.innerHTML = "<b>紫光：</b>感光极速。同时舍勒观察到氨水可溶解未感光银盐，<span class='quote'>“定影”</span>雏形初现。";
+                document.getElementById('btn-next2').style.display = "block";
             } else { 
-                info.innerHTML = "<b>红光：</b><span class='desc-grey'>红光则需20分钟，是紫光所用时间的80倍。</span>";
-                btnNext.style.display = "none";
-                btnBack.style.display = "block";
+                info.innerHTML = "<b>红光：</b>反应极慢，体现了光化学反应对频率的依赖。"; 
             }
         }
 
         function runExpo() {
             const img = document.getElementById('leather-img');
             const tag = document.getElementById('tag-hist');
-            const info = document.getElementById('step5-info');
-            document.getElementById('btn-expo').style.display = 'none';
+            const info = document.getElementById('step4-info');
+            const btn = document.getElementById('btn-expo');
+            btn.style.pointerEvents = "none"; // 防止重复点击
+            btn.style.opacity = "0.5";
 
+            // 1. 显影逻辑
             img.style.opacity = 0;
             setTimeout(() => {
-                img.src = "item_leather_with_leaf.png"; 
-                img.style.opacity = 1;
-                tag.style.opacity = 1;
-                info.innerHTML = "<b>显影成功！</b><span class='desc-grey'>这是诞生于1802年的物影图像（Photograms），</span><span class='quote-accent'>也是人类历史上的珍贵影像。</span>";
+                img.src = "item_leather_with_leaf.png";
+                img.onload = function() {
+                    img.style.opacity = 1;
+                    tag.style.opacity = 1;
+                    info.innerHTML = "<b>显影成功：</b>这是诞生于1802年的物影图像（Photograms），也是人类历史上的珍贵影像。";
+                    btn.style.display = "none";
 
-                setTimeout(() => {
-                    img.style.filter = "brightness(0)";
-                    info.innerHTML = "<b>未竟的事业：</b><br><span class='desc-grey'>由于缺乏永久定影手段：影像在光线下迅速变黑。人类仍在寻找捕捉永恒的方法。</span>";
-                    setTimeout(() => { if(confirm("是否重新开始？")) location.reload(); }, 6000);
-                }, 4000); 
+                    // 2. 结局逻辑
+                    setTimeout(() => {
+                        document.getElementById('final-overlay').style.opacity = "0.98";
+                        info.innerHTML = "<b>遗憾的结局：</b><br>由于缺乏永久定影手段，影像在光线下迅速变黑。人类仍在寻找捕捉永恒的方法。";
+                        setTimeout(() => { if(confirm("是否重新开始探索？")) location.reload(); }, 4000);
+                    }, 5000);
+                };
             }, 1000);
         }
     </script>
 </body>
 </html>
-
-
